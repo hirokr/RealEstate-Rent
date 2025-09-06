@@ -7,9 +7,13 @@ import { LeaseModule } from './lease/lease.module';
 import { ManagerModule } from './manager/manager.module';
 import { PropertyModule } from './property/property.module';
 import { TanantModule } from './tanant/tanant.module';
+import { LoggerModule } from './logger/logger.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { LoggerModule } from './logger/logger.module';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
-  imports: [DatabaseModule, ApplicationModule, LeaseModule, ManagerModule, PropertyModule, TanantModule],
+  imports: [DatabaseModule, ApplicationModule, LeaseModule, ManagerModule, PropertyModule, TanantModule, LoggerModule, PrismaModule],
   controllers: [AppController],
   providers: [AppService],
 })
