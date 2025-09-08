@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+  // previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // extensions = [postgis]
+}
+
+enum Highlight {
+  HighSpeedInternetAccess
+  WasherDryer
+  AirConditioning
+  Heating
+  SmokeFree
+  CableReady
+  SatelliteTV
+  DoubleVanities
+  TubShower
+  Intercom
+  SprinklerSystem
+  RecentlyRenovated
+  CloseToTransit
+  GreatView
+  QuietNeighborhood
+}
+
+enum Amenity {
+  WasherDryer
+  AirConditioning
+  Dishwasher
+  HighSpeedInternet
+  HardwoodFloors
+  WalkInClosets
+  Microwave
+  Refrigerator
+  Pool
+  Gym
+  Parking
+  PetsAllowed
+  WiFi
+}
+
+enum Role {
+  MANAGER
+  TENANT
+  ADMIN
+}
+
+enum PropertyType {
+  Rooms
+  Tinyhouse
+  Apartment
+  Villa
+  Townhouse
+  Cottage
+}
+
+enum ApplicationStatus {
+  Pending
+  Denied
+  Approved
+}
+
+enum PaymentStatus {
+  Pending
+  Paid
+  PartiallyPaid
+  Overdue
+}
+
+model Property {
+  id                Int          @id @default(autoincrement())
+  name              String
+  description       String
+  pricePerMonth     Float
+  securityDeposit   Float
+  applicationFee    Float
+  photoUrls         String[]
+  amenities         Amenity[]
+  highlights        Highlight[]
+  isPetsAllowed     Boolean      @default(false)
+  isParkingIncluded Boolean      @default(false)
+  beds              Int
+  baths             Float
+  squareFeet        Int
+  propertyType      PropertyType
+  postedDate        DateTime     @default(now())
+  averageRating     Float?       @default(0)
+  numberOfReviews   Int?         @default(0)
+  locationId        Int
+  managerCognitoId  String
+  managerId         Int
+
+  location     Location      @relation(fields: [locationId], references: [id])
+  manager      Manager       @relation(fields: [managerId], references: [id])
+  leases       Lease[]
+  applications Application[]
+  favoritedBy  Tenant[]      @relation("TenantFavorites")
+  tenants      Tenant[]      @relation("TenantProperties")
+
+  @@index([managerId])
+  @@index([locationId])
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  cognitoId   String?  @unique
+  name        String
+  email       String   @unique
+  password    String?
+  role        Role     @default(TENANT)
+  phoneNumber String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  manager Manager?
+  tenant  Tenant?
+
+  @@index([cognitoId])
+  @@index([email])
+}
+
+model Manager {
+  id                Int        @id @default(autoincrement())
+  userId            Int        @unique
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  managedProperties Property[]
+
+  @@index([userId])
+}
+
+model Tenant {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  properties   Property[]    @relation("TenantProperties")
+  favorites    Property[]    @relation("TenantFavorites")
+  applications Application[]
+  leases       Lease[]
+
+  @@index([userId])
+}
+
+model Location {
+  id          Int                                   @id @default(autoincrement())
+  address     String
+  city        String
+  state       String
+  country     String
+  postalCode  String
+  coordinates Unsupported("geography(Point, 4326)")
+
+  properties Property[]
+
+  @@index([city, state])
+}
+
+model Application {
+  id              Int               @id @default(autoincrement())
+  applicationDate DateTime
+  status          ApplicationStatus
+  propertyId      Int
+  tenantCognitoId String
+  name            String
+  email           String
+  phoneNumber     String
+  message         String?
+  leaseId         Int?              @unique
+
+  property Property @relation(fields: [propertyId], references: [id])
+  tenantId Int
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+  lease    Lease?   @relation(fields: [leaseId], references: [id])
+
+  @@index([propertyId])
+  @@index([tenantId])
+  @@index([status])
+}
+
+model Lease {
+  id              Int      @id @default(autoincrement())
+  tenantId        Int
+  startDate       DateTime
+  endDate         DateTime
+  rent            Float
+  deposit         Float
+  propertyId      Int
+  tenantCognitoId String
+
+  property Property @relation(fields: [propertyId], references: [id])
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+
+  application Application?
+  payments    Payment[]
+
+  @@index([propertyId])
+  @@index([tenantId])
+  @@index([startDate, endDate])
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  amountDue     Float
+  amountPaid    Float
+  dueDate       DateTime
+  paymentDate   DateTime
+  paymentStatus PaymentStatus
+  leaseId       Int
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+
+  @@index([leaseId])
+  @@index([paymentStatus])
+  @@index([dueDate])
+}

@@ -31,9 +31,7 @@ const config: Config = {
   				'700': '#27272a',
   				'800': '#111113',
   				'900': '#040405',
-  				'950': '#000000',
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				'950': '#000000'
   			},
   			secondary: {
   				'50': '#fefcfc',
@@ -46,9 +44,7 @@ const config: Config = {
   				'700': '#dc2828',
   				'800': '#7c1414',
   				'900': '#400a0a',
-  				'950': '#2c0707',
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
+  				'950': '#2c0707'
   			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
@@ -82,11 +78,6 @@ const config: Config = {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			}
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
   		}
   	}
   },
