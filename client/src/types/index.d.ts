@@ -1,7 +1,13 @@
 import { LucideIcon } from "lucide-react";
-import { AuthUser } from "aws-amplify/auth";
 import { Manager, Tenant, Property, Application } from "./prismaTypes";
 import { MotionProps as OriginalMotionProps } from "framer-motion";
+
+interface AuthUser {
+  userId: string;
+  username: string;
+  email: string;
+  role: string;
+}
 
 declare module "framer-motion" {
   interface MotionProps extends OriginalMotionProps {
@@ -60,13 +66,13 @@ declare global {
   }
 
   interface PropertyOverviewProps {
-    propertyId: number;
+    propertyId: string;
   }
 
   interface ApplicationModalProps {
     isOpen: boolean;
     onClose: () => void;
-    propertyId: number;
+    propertyId: string;
   }
 
   interface ContactWidgetProps {
@@ -78,7 +84,7 @@ declare global {
   }
 
   interface PropertyDetailsProps {
-    propertyId: number;
+    propertyId: string;
   }
 
   interface PropertyOverviewProps {

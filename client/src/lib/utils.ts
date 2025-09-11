@@ -22,12 +22,14 @@ export function formatPriceValue(value: number | null, isMin: boolean) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function cleanParams(params: Record<string, any>): Record<string, any> {
+  console.log(params);
   return Object.fromEntries(
     Object.entries(params).filter(
       (
         [_, value] // eslint-disable-line @typescript-eslint/no-unused-vars
       ) =>
         value !== undefined &&
+        !Number.isNaN(value) &&
         value !== "any" &&
         value !== "" &&
         (Array.isArray(value) ? value.some((v) => v !== null) : value !== null)
@@ -62,23 +64,14 @@ export const createNewUserInDatabase = async (
   userRole: string,
   fetchWithBQ: any
 ) => {
-  const createEndpoint =
-    userRole?.toLowerCase() === "manager" ? "/managers" : "/tenants";
-
-  const createUserResponse = await fetchWithBQ({
-    url: createEndpoint,
-    method: "POST",
-    body: {
-      cognitoId: user.userId,
+  // For now, return a mock response since user creation should be handled by auth service
+  // In a real implementation, this would call the auth/register endpoint
+  return {
+    data: {
+      id: user.userId,
       name: user.username,
-      email: idToken?.payload?.email || "",
+      email: user.attributes?.email || "",
       phoneNumber: "",
     },
-  });
-
-  if (createUserResponse.error) {
-    throw new Error("Failed to create user record");
-  }
-
-  return createUserResponse;
+  };
 };

@@ -1,13 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
-  // previewFeatures = ["postgresqlExtensions"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  // extensions = [postgis]
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
 }
 
 enum Highlight {
@@ -44,12 +43,6 @@ enum Amenity {
   WiFi
 }
 
-enum Role {
-  MANAGER
-  TENANT
-  ADMIN
-}
-
 enum PropertyType {
   Rooms
   Tinyhouse
@@ -73,7 +66,7 @@ enum PaymentStatus {
 }
 
 model Property {
-  id                Int          @id @default(autoincrement())
+  id                String       @id @default(uuid())
   name              String
   description       String
   pricePerMonth     Float
@@ -91,64 +84,42 @@ model Property {
   postedDate        DateTime     @default(now())
   averageRating     Float?       @default(0)
   numberOfReviews   Int?         @default(0)
-  locationId        Int
-  managerCognitoId  String
-  managerId         Int
+  locationId        String
+  managerId         String
 
-  location     Location      @relation(fields: [locationId], references: [id])
-  manager      Manager       @relation(fields: [managerId], references: [id])
+  location     Location      @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  manager      Manager       @relation(fields: [managerId], references: [id], onDelete: Cascade)
   leases       Lease[]
   applications Application[]
   favoritedBy  Tenant[]      @relation("TenantFavorites")
   tenants      Tenant[]      @relation("TenantProperties")
-
-  @@index([managerId])
-  @@index([locationId])
-}
-
-model User {
-  id          Int      @id @default(autoincrement())
-  cognitoId   String?  @unique
-  name        String
-  email       String   @unique
-  password    String?
-  role        Role     @default(TENANT)
-  phoneNumber String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Relations
-  manager Manager?
-  tenant  Tenant?
-
-  @@index([cognitoId])
-  @@index([email])
 }
 
 model Manager {
-  id                Int        @id @default(autoincrement())
-  userId            Int        @unique
-  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  managedProperties Property[]
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  passwordHash String
+  phoneNumber  String
 
-  @@index([userId])
+  managedProperties Property[]
 }
 
 model Tenant {
-  id     Int  @id @default(autoincrement())
-  userId Int  @unique
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String @id @default(uuid())
+  name         String
+  email        String @unique
+  passwordHash String
+  phoneNumber  String
 
   properties   Property[]    @relation("TenantProperties")
   favorites    Property[]    @relation("TenantFavorites")
   applications Application[]
   leases       Lease[]
-
-  @@index([userId])
 }
 
 model Location {
-  id          Int                                   @id @default(autoincrement())
+  id          String                                @id @default(uuid())
   address     String
   city        String
   state       String
@@ -157,65 +128,47 @@ model Location {
   coordinates Unsupported("geography(Point, 4326)")
 
   properties Property[]
-
-  @@index([city, state])
 }
 
 model Application {
-  id              Int               @id @default(autoincrement())
+  id              String            @id @default(uuid())
   applicationDate DateTime
   status          ApplicationStatus
-  propertyId      Int
-  tenantCognitoId String
+  propertyId      String
+  tenantId        String
   name            String
-  email           String
   phoneNumber     String
   message         String?
-  leaseId         Int?              @unique
+  leaseId         String?           @unique
 
-  property Property @relation(fields: [propertyId], references: [id])
-  tenantId Int
-  tenant   Tenant   @relation(fields: [tenantId], references: [id])
-  lease    Lease?   @relation(fields: [leaseId], references: [id])
-
-  @@index([propertyId])
-  @@index([tenantId])
-  @@index([status])
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  lease    Lease?   @relation(fields: [leaseId], references: [id], onDelete: Cascade)
 }
 
 model Lease {
-  id              Int      @id @default(autoincrement())
-  tenantId        Int
-  startDate       DateTime
-  endDate         DateTime
-  rent            Float
-  deposit         Float
-  propertyId      Int
-  tenantCognitoId String
+  id         String   @id @default(uuid())
+  startDate  DateTime
+  endDate    DateTime
+  rent       Float
+  deposit    Float
+  propertyId String
+  tenantId   String
 
-  property Property @relation(fields: [propertyId], references: [id])
-  tenant   Tenant   @relation(fields: [tenantId], references: [id])
-
+  property    Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   application Application?
   payments    Payment[]
-
-  @@index([propertyId])
-  @@index([tenantId])
-  @@index([startDate, endDate])
 }
 
 model Payment {
-  id            Int           @id @default(autoincrement())
+  id            String        @id @default(uuid())
   amountDue     Float
   amountPaid    Float
   dueDate       DateTime
   paymentDate   DateTime
   paymentStatus PaymentStatus
-  leaseId       Int
+  leaseId       String
 
-  lease Lease @relation(fields: [leaseId], references: [id])
-
-  @@index([leaseId])
-  @@index([paymentStatus])
-  @@index([dueDate])
+  lease Lease @relation(fields: [leaseId], references: [id], onDelete: Cascade)
 }

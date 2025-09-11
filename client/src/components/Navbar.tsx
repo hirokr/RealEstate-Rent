@@ -6,6 +6,7 @@ import Link from "next/link";
 import React from "react";
 import { Button } from "./ui/button";
 import { useGetAuthUserQuery } from "@/state/api";
+import { useAuth } from "@/app/(auth)/authProvider";
 import { usePathname, useRouter } from "next/navigation";
 
 import { Bell, MessageCircle, Plus, Search } from "lucide-react";
@@ -20,11 +21,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { SidebarTrigger } from "./ui/sidebar";
 
 
-const signOut = () => void 0; //TODO: implement sign out functionality
-
-
 const Navbar = () => {
   const { data: authUser } = useGetAuthUserQuery();
+  const { logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -32,8 +31,7 @@ const Navbar = () => {
     pathname.includes("/managers") || pathname.includes("/tenants");
 
   const handleSignOut = async () => {
-    await signOut();
-    window.location.href = "/";
+    await logout();
   };
 
   return (
@@ -163,7 +161,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link href="/signin">
+              <Link href="/login">
                 <Button
                   variant="outline"
                   className="text-white border-white bg-transparent hover:bg-white hover:text-primary-700 rounded-lg"
@@ -171,7 +169,7 @@ const Navbar = () => {
                   Sign In
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/register">
                 <Button
                   variant="secondary"
                   className="text-white bg-secondary-600 hover:bg-white hover:text-primary-700 rounded-lg"
