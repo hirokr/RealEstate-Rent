@@ -144,6 +144,7 @@ model Application {
   status          ApplicationStatus
   propertyId      String
   tenantId        String
+  email           String
   name            String
   phoneNumber     String
   message         String?

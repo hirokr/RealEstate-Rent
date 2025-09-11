@@ -47,7 +47,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const { user: loggedInUser } = await authService.login({ email, password });
+      const { user: loggedInUser } = await authService.login({
+        email,
+        password,
+      });
       setUser(loggedInUser);
     } catch (error) {
       throw error;
@@ -72,7 +75,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     await authService.logout();
     setUser(null);
-    router.push("/login");
+    router.push("/landing");
   };
 
   const value = {
@@ -102,41 +105,21 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
 
     // Redirect authenticated users away from auth pages
     if (user && isAuthPage) {
-      const redirectPath = user.role === "manager" ? "/managers/properties" : "/search";
+      const redirectPath =
+        user.role === "manager" ? "/managers/properties" : "/search";
       router.push(redirectPath);
       return;
     }
 
-    // Redirect unauthenticated users from dashboard pages
     if (!user && isDashboardPage) {
-      router.push("/login");
+      router.push("/landing");
       return;
     }
   }, [user, isAuthPage, isDashboardPage, isLoading, router]);
 
-  // Show loading while checking auth
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
-  }
-
-  // Allow access to public pages and auth pages
-  if (isPublicPage || isAuthPage || (user && isDashboardPage)) {
-    return <>{children}</>;
-  }
-
-  // Fallback loading state
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-lg">Loading...</div>
-    </div>
-  );
+  return <>{children}</>;
 };
 
-// Wrapper component that provides both context and auth logic
 const AuthProviderWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthProvider>

@@ -70,7 +70,9 @@ export class PropertyService {
 
       if (amenities && amenities !== 'any') {
         const amenitiesArray = amenities.split(',');
-        whereConditions.push(Prisma.sql`p.amenities @> ${amenitiesArray}`);
+        whereConditions.push(
+          Prisma.sql`p.amenities @> ${amenitiesArray}::"Amenity"[]`,
+        );
       }
 
       if (availableFrom && availableFrom !== 'any') {
@@ -80,7 +82,7 @@ export class PropertyService {
             Prisma.sql`EXISTS (
               SELECT 1 FROM "Lease" l 
               WHERE l."propertyId" = p.id 
-              AND l."startDate" <= ${date.toISOString()}
+              AND l."startDate" >= ${date.toISOString()}::timestamp
             )`,
           );
         }
@@ -113,7 +115,13 @@ export class PropertyService {
               'longitude', ST_X(l."coordinates"::geometry),
               'latitude', ST_Y(l."coordinates"::geometry)
             )
-          ) as location
+          ) as location,
+          p.amenities,
+          (
+            SELECT MIN(le."startDate") 
+            FROM "Lease" le 
+            WHERE le."propertyId" = p.id
+          ) as availableFrom
         FROM "Property" p
         JOIN "Location" l ON p."locationId" = l.id
         ${
@@ -198,11 +206,15 @@ export class PropertyService {
 
       const parsedAmenities = Array.isArray(amenities)
         ? amenities
-        : amenities ? JSON.parse(amenities) : [];
+        : amenities
+          ? JSON.parse(amenities)
+          : [];
 
       const parsedHighlights = Array.isArray(highlights)
         ? highlights
-        : highlights ? JSON.parse(highlights) : [];
+        : highlights
+          ? JSON.parse(highlights)
+          : [];
 
       // Upload photos
       const photoUrls = await this.uploadService.uploadPropertyImages(files);

@@ -146,23 +146,8 @@ class AuthService {
 
   async logout() {
     this.clearAuth();
-    // Optionally call a logout endpoint on the server
-    // await fetch(`${this.baseUrl}/auth/logout`, { method: 'POST' });
   }
 }
 
 export const authService = AuthService.getInstance();
 
-// Mock login function for development (fallback)
-export const mockLogin = (email: string, role: "tenant" | "manager" = "tenant") => {
-  const mockUser: AuthUser = {
-    userId: `mock-${role}-${Date.now()}`,
-    email,
-    role,
-  };
-
-  const mockToken = `mock-jwt-token-${Date.now()}`;
-  authService.setAuth(mockToken, mockUser);
-
-  return { user: mockUser, token: mockToken };
-};

@@ -24,9 +24,9 @@ const ApplicationModal = ({
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phoneNumber: "",
+      name: authUser?.userInfo.name as string | "",
+      email: authUser?.userInfo.email as string | "",
+      phoneNumber: '',
       message: "",
     },
   });

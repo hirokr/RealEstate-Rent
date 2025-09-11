@@ -31,16 +31,16 @@ export const getProperties = async (
       latitude,
       longitude,
     } = req.query;
-
+    
     let whereConditions: Prisma.Sql[] = [];
-
+    
     if (favoriteIds) {
       const favoriteIdsArray = (favoriteIds as string).split(",").map(Number);
       whereConditions.push(
         Prisma.sql`p.id IN (${Prisma.join(favoriteIdsArray)})`
       );
     }
-
+    
     if (priceMin) {
       whereConditions.push(
         Prisma.sql`p."pricePerMonth" >= ${Number(priceMin)}`
@@ -52,7 +52,7 @@ export const getProperties = async (
         Prisma.sql`p."pricePerMonth" <= ${Number(priceMax)}`
       );
     }
-
+    
     if (beds && beds !== "any") {
       whereConditions.push(Prisma.sql`p.beds >= ${Number(beds)}`);
     }
@@ -60,19 +60,19 @@ export const getProperties = async (
     if (baths && baths !== "any") {
       whereConditions.push(Prisma.sql`p.baths >= ${Number(baths)}`);
     }
-
+    
     if (squareFeetMin) {
       whereConditions.push(
         Prisma.sql`p."squareFeet" >= ${Number(squareFeetMin)}`
       );
     }
-
+    
     if (squareFeetMax) {
       whereConditions.push(
         Prisma.sql`p."squareFeet" <= ${Number(squareFeetMax)}`
       );
     }
-
+    
     if (propertyType && propertyType !== "any") {
       whereConditions.push(
         Prisma.sql`p."propertyType" = ${propertyType}::"PropertyType"`
@@ -83,10 +83,10 @@ export const getProperties = async (
       const amenitiesArray = (amenities as string).split(",");
       whereConditions.push(Prisma.sql`p.amenities @> ${amenitiesArray}`);
     }
-
+    
     if (availableFrom && availableFrom !== "any") {
       const availableFromDate =
-        typeof availableFrom === "string" ? availableFrom : null;
+      typeof availableFrom === "string" ? availableFrom : null;
       if (availableFromDate) {
         const date = new Date(availableFromDate);
         if (!isNaN(date.getTime())) {
@@ -100,13 +100,13 @@ export const getProperties = async (
         }
       }
     }
-
+    
     if (latitude && longitude) {
       const lat = parseFloat(latitude as string);
       const lng = parseFloat(longitude as string);
       const radiusInKilometers = 1000;
       const degrees = radiusInKilometers / 111; // Converts kilometers to degrees
-
+      
       whereConditions.push(
         Prisma.sql`ST_DWithin(
           l.coordinates::geometry,
@@ -115,6 +115,7 @@ export const getProperties = async (
         )`
       );
     }
+    console.log(whereConditions)
 
     const completeQuery = Prisma.sql`
       SELECT 

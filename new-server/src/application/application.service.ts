@@ -98,6 +98,7 @@ export class ApplicationService {
             name: dto.name,
             phoneNumber: dto.phoneNumber,
             message: dto.message,
+            email: dto.email,
             propertyId: dto.propertyId,
             tenantId: tenantId,
             leaseId: lease.id,

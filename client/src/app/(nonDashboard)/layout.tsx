@@ -6,25 +6,26 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
-  const { data: authUser, isLoading: authLoading } = useGetAuthUserQuery();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(true);
+  // const { data: authUser, isLoading: authLoading } = useGetAuthUserQuery();
+  // const router = useRouter();
+  // const pathname = usePathname();
+  // const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (authUser) {
-      const userRole = authUser.userRole?.toLowerCase();
-      console.log(userRole, pathname);
-      if (
-        (userRole === "manager" && pathname.startsWith("/search")) ||
-        (userRole === "manager" && pathname.startsWith("/"))
-      ) {
-        router.push("/manager/properties", { scroll: false });
-      } else {
-        setIsLoading(false);
-      }
-    }
-  }, [authUser, router, pathname]);
+  // useEffect(() => {
+  //   console.log(authUser);
+  //   if (authUser) {
+  //     const userRole = authUser.userRole?.toLowerCase();
+  //     console.log(userRole, pathname);
+  //     if (
+  //       (userRole === "manager" && pathname.startsWith("/search")) ||
+  //       (userRole === "manager" && pathname.startsWith("/"))
+  //     ) {
+  //       router.push("/manager/properties", { scroll: false });
+  //     } else {
+  //       setIsLoading(false);
+  //     }
+  //   }
+  // }, [authUser, router, pathname]);
 
   // if (authLoading || isLoading) return <>Loading...</>;
 
